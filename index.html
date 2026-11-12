@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <!-- Makes the page fit phone screens instead of showing a zoomed-out desktop page -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QR &amp; Barcode Scanner</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="app">
+
+    <!-- SIDEBAR: app name, navigation, theme switch -->
+    <aside class="sidebar">
+      <!-- The shop name. Click it to change it; it is also printed on receipts. -->
+      <h1 class="logo">
+        <button type="button" id="shop-name" class="logo-btn" title="Click to change the shop name">ScanDesk</button>
+      </h1>
+
+      <nav class="nav" aria-label="Main">
+        <button type="button" class="nav-item active" data-view="camera" aria-current="true">
+          <span aria-hidden="true">📷</span> Camera
+        </button>
+        <button type="button" class="nav-item" data-view="upload">
+          <span aria-hidden="true">🖼️</span> Upload
+        </button>
+        <a class="nav-item" href="#history">
+          <span aria-hidden="true">🕘</span> History
+        </a>
+      </nav>
+
+      <button type="button" id="theme-toggle" class="theme-toggle">
+        <span id="theme-icon" aria-hidden="true">🌙</span>
+        <span id="theme-label">Dark mode</span>
+      </button>
+    </aside>
+
+    <!-- MAIN: the scanning area and the latest result -->
+    <main class="main">
+
+      <!-- View 1: scan with the device camera -->
+      <section id="view-camera" class="card view">
+        <h2>Camera scanner</h2>
+
+        <!-- html5-qrcode draws the live video inside this empty div -->
+        <!-- The outer frame keeps its normal width while scanner.js makes the
+             reader itself larger and zooms it out (see scanner.js) -->
+        <div class="reader-frame">
+          <div id="reader" class="reader"></div>
+        </div>
+
+        <div class="controls">
+          <label for="camera-select">Camera</label>
+          <!-- Camera names are only known after the user grants permission -->
+          <select id="camera-select" disabled>
+            <option>Press Start to find cameras</option>
+          </select>
+
+          <button type="button" id="start-btn" class="btn btn-primary">Start scanner</button>
+          <button type="button" id="stop-btn" class="btn" disabled>Stop scanner</button>
+        </div>
+
+        <!-- Shows the camera picture size and a counter while scanning -->
+        <p id="camera-status" class="status" hidden></p>
+
+        <!-- role="alert" makes screen readers announce the error when it appears -->
+        <p id="camera-error" class="error" role="alert" hidden></p>
+      </section>
+
+      <!-- View 2: scan an image file. "hidden" keeps it invisible until chosen -->
+      <section id="view-upload" class="card view" hidden>
+        <h2>Upload image</h2>
+
+        <label for="file-input">Choose a JPG, PNG or WEBP image with a QR code or barcode</label>
+        <input type="file" id="file-input" accept=".jpg,.jpeg,.png,.webp">
+
+        <p id="upload-error" class="error" role="alert" hidden></p>
+      </section>
+
+      <!-- Latest scan result. Shown after a successful scan -->
+      <section id="result" class="card result" aria-live="polite" hidden>
+        <h2>Result</h2>
+
+        <p class="result-meta">
+          <span id="result-type" class="badge"></span>
+          <time id="result-time"></time>
+        </p>
+
+        <p id="result-content" class="result-content"></p>
+
+        <div class="controls">
+          <button type="button" id="copy-btn" class="btn">Copy</button>
+          <a id="open-link" class="btn btn-primary" target="_blank" rel="noopener noreferrer" hidden>Open link</a>
+        </div>
+      </section>
+
+      <!-- The bill: scanned product barcodes are added here, like a cashier -->
+      <section id="bill" class="card">
+        <h2>Bill</h2>
+
+        <!-- For when the camera cannot read a barcode: type the digits
+             printed under it. A <form> makes the Enter key work too. -->
+        <form id="manual-form" class="controls">
+          <label for="manual-input">Type a barcode number</label>
+          <input type="text" id="manual-input" inputmode="numeric" autocomplete="off"
+                 placeholder="e.g. 6922829569848">
+          <button type="submit" class="btn">Add to bill</button>
+        </form>
+
+        <!-- The wrapper lets a wide table scroll sideways on small screens -->
+        <div class="table-wrap" id="bill-table" hidden>
+          <table class="bill-table">
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th>Qty</th>
+                <th>Price</th>
+                <th>Subtotal</th>
+                <th><span class="visually-hidden">Actions</span></th>
+              </tr>
+            </thead>
+            <!-- app.js fills this with one <tr> per product -->
+            <tbody id="bill-rows"></tbody>
+            <tfoot>
+              <tr>
+                <th colspan="3">Total</th>
+                <td id="bill-total"></td>
+                <td></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <p id="bill-empty" class="empty">Scan a QR code or barcode to start a bill.</p>
+
+        <div id="bill-buttons" class="controls" hidden>
+          <button type="button" id="finish-btn" class="btn btn-primary">Finish bill</button>
+          <button type="button" id="cancel-bill-btn" class="btn btn-danger">Cancel bill</button>
+        </div>
+      </section>
+
+      <!-- Every finished bill, newest first -->
+      <section id="past-bills" class="card">
+        <h2>Past bills</h2>
+        <div class="controls">
+          <button type="button" id="export-bills-btn" class="btn">Export bills CSV</button>
+        </div>
+        <ul id="bills-list" class="history-list"></ul>
+        <p id="bills-empty" class="empty">No finished bills yet.</p>
+      </section>
+
+    </main>
+
+    <!-- HISTORY PANEL: saved scans, search, export -->
+    <aside id="history" class="history card">
+      <h2>Scan history</h2>
+
+      <label for="search-input" class="visually-hidden">Search history</label>
+      <input type="search" id="search-input" placeholder="Search scans…">
+
+      <div class="controls">
+        <button type="button" id="export-btn" class="btn">Export CSV</button>
+        <button type="button" id="clear-btn" class="btn btn-danger">Clear all</button>
+      </div>
+
+      <!-- history.js fills this list with one <li> per saved scan -->
+      <ul id="history-list" class="history-list"></ul>
+      <p id="history-empty" class="empty">No scans yet.</p>
+    </aside>
+
+  </div>
+
+  <!-- The receipt. Invisible on screen; when printing, style.css hides the
+       app and shows only this. app.js fills it right before printing. -->
+  <section id="receipt" class="receipt" aria-hidden="true"></section>
+
+  <!-- The scanning library. Loaded first, it creates the global Html5Qrcode.
+       The version is pinned (@2.3.8) so an update cannot change it under us.
+       integrity is a fingerprint of the file: if the CDN ever serves different
+       code, the browser refuses to run it. -->
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"
+          integrity="sha384-c9d8RFSL+u3exBOJ4Yp3HUJXS4znl9f+z66d1y54ig+ea249SpqR+w1wyvXz/lk+"
+          crossorigin="anonymous"></script>
+
+  <!-- type="module" lets app.js import functions from the other JS files -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
