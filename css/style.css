@@ -1,0 +1,622 @@
+/* ==========================================================================
+   1. THEME COLOURS
+   CSS variables (names starting with --) store values once so the rest of
+   the file can reuse them with var(--name). Changing a variable here changes
+   every place that uses it.
+   ========================================================================== */
+
+:root {
+  --bg: #f4f5f7;          /* page background */
+  --surface: #ffffff;     /* cards and sidebar */
+  --text: #1a1d23;
+  --muted: #667085;       /* secondary text */
+  --border: #e3e6ea;
+  --accent: #4f46e5;      /* primary buttons, active nav item */
+  --accent-text: #ffffff; /* text on top of the accent colour */
+  --danger: #d92d20;
+  --radius: 14px;
+  --shadow: 0 1px 2px rgba(16, 24, 40, 0.06), 0 4px 12px rgba(16, 24, 40, 0.05);
+}
+
+/* Dark mode: same variable names, different values.
+   Applies when <html> has data-theme="dark". */
+[data-theme="dark"] {
+  --bg: #0f1115;
+  --surface: #181b21;
+  --text: #e8eaed;
+  --muted: #9aa3af;
+  --border: #2a2e37;
+  --accent: #818cf8;
+  --accent-text: #0f1115;
+  --danger: #f97066;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* ==========================================================================
+   2. BASE
+   ========================================================================== */
+
+/* Makes width/height include padding and border, so sizes are predictable */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* Our own "display" rules below would otherwise override the hidden attribute */
+[hidden] {
+  display: none !important;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  background: var(--bg);
+  color: var(--text);
+  transition: background-color 0.25s, color 0.25s;
+}
+
+h1,
+h2 {
+  margin: 0;
+  line-height: 1.2;
+}
+
+h2 {
+  font-size: 1.15rem;
+}
+
+/* Hidden on screen but still read out by screen readers */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ==========================================================================
+   3. LAYOUT
+   CSS Grid with three columns: sidebar | main | history.
+   1fr means "take whatever space is left".
+   ========================================================================== */
+
+.app {
+  display: grid;
+  grid-template-columns: 220px 1fr 340px;
+  gap: 20px;
+  min-height: 100vh;
+  padding: 20px;
+  align-items: start;
+}
+
+.main {
+  display: grid;
+  gap: 20px;
+  min-width: 0; /* lets long scanned text wrap instead of stretching the column */
+}
+
+/* ==========================================================================
+   4. CARDS
+   ========================================================================== */
+
+.card {
+  display: grid;
+  gap: 16px;
+  padding: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  transition: background-color 0.25s, border-color 0.25s;
+  animation: fade-in 0.25s ease-out;
+}
+
+/* Runs when a card appears, for example when a hidden view is shown */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ==========================================================================
+   5. SIDEBAR
+   ========================================================================== */
+
+.sidebar {
+  position: sticky; /* stays in view while the page scrolls */
+  top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-height: calc(100vh - 40px);
+  padding: 20px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  transition: background-color 0.25s, border-color 0.25s;
+}
+
+.logo {
+  padding: 0 10px;
+  font-size: 1.3rem;
+  color: var(--accent);
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Nav buttons, the History link and the theme toggle share one look */
+.nav-item,
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-weight: 500;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s;
+}
+
+.nav-item:hover,
+.theme-toggle:hover {
+  background: var(--bg);
+  color: var(--text);
+}
+
+.nav-item.active {
+  background: var(--accent);
+  color: var(--accent-text);
+}
+
+/* Pushes the theme toggle to the bottom of the sidebar */
+.theme-toggle {
+  margin-top: auto;
+}
+
+/* ==========================================================================
+   6. BUTTONS AND FORM CONTROLS
+   ========================================================================== */
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 9px 16px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.15s, border-color 0.15s, transform 0.1s;
+}
+
+.btn:hover {
+  background: var(--bg);
+}
+
+.btn:active {
+  transform: scale(0.97);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-text);
+}
+
+.btn-primary:hover {
+  background: var(--accent);
+  filter: brightness(1.1);
+}
+
+.btn-danger {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+/* The typed-barcode box grows to fill the row between label and button */
+#manual-input {
+  flex: 1;
+  min-width: 160px;
+}
+
+select,
+input[type="text"],
+input[type="search"],
+input[type="file"] {
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+}
+
+input[type="search"],
+input[type="file"] {
+  width: 100%;
+}
+
+label {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+/* A visible outline for keyboard users moving with the Tab key */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ==========================================================================
+   7. SCANNER, RESULT, HISTORY
+   ========================================================================== */
+
+/* Holds the reader. min-width: 0 stops the oversized reader from stretching
+   the card while the camera runs. */
+.reader-frame {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.reader {
+  display: grid;
+  place-items: center;
+  min-height: 260px;
+  overflow: hidden;
+  border: 2px dashed var(--border);
+  border-radius: var(--radius);
+  color: var(--muted);
+}
+
+/* Placeholder text, shown only while the div has nothing inside it */
+.reader:empty::before {
+  content: "Camera preview appears here";
+}
+
+/* Once the library has put the video inside, drop the placeholder sizing so
+   the scan-box overlay lines up with the video */
+.reader:not(:empty) {
+  display: block;
+  min-height: 0;
+  border-style: solid;
+}
+
+.status {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.error {
+  margin: 0;
+  padding: 10px 14px;
+  border: 1px solid var(--danger);
+  border-radius: 10px;
+  color: var(--danger);
+}
+
+.result-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.badge {
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--accent-text);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.result-content {
+  margin: 0;
+  padding: 14px;
+  border-radius: 10px;
+  background: var(--bg);
+  font-family: ui-monospace, Consolas, monospace;
+  overflow-wrap: anywhere; /* breaks long URLs so they do not overflow the card */
+}
+
+.history-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.empty {
+  margin: 0;
+  color: var(--muted);
+  text-align: center;
+}
+
+/* ==========================================================================
+   8. RESPONSIVE
+   Media queries apply rules only below a given screen width.
+   ========================================================================== */
+
+/* Tablets and small laptops: history moves under the main area */
+@media (max-width: 1100px) {
+  .app {
+    grid-template-columns: 220px 1fr;
+  }
+
+  .history {
+    grid-column: 2;
+  }
+}
+
+/* Phones: one column, sidebar becomes a bar across the top */
+@media (max-width: 700px) {
+  .app {
+    grid-template-columns: 1fr;
+    gap: 14px;
+    padding: 14px;
+  }
+
+  .history {
+    grid-column: 1;
+  }
+
+  .sidebar {
+    position: static;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    min-height: 0;
+    padding: 12px;
+  }
+
+  .nav {
+    flex-direction: row;
+    order: 3;       /* nav drops to its own row under logo + toggle */
+    width: 100%;
+  }
+
+  .nav-item {
+    justify-content: center;
+    padding: 8px;
+  }
+
+  .theme-toggle {
+    width: auto;
+    margin-top: 0;
+    margin-left: auto;
+  }
+}
+
+/* Respect the "reduce motion" setting some users turn on in their system */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* ==========================================================================
+   9. HISTORY ROWS (created by app.js, one per saved scan)
+   ========================================================================== */
+
+.history-item {
+  display: grid;
+  gap: 6px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg);
+  animation: fade-in 0.2s ease-out;
+}
+
+.history-item p {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.history-title {
+  font-weight: 600;
+}
+
+.history-content {
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 0.85rem;
+}
+
+.history-meta {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.btn-small {
+  padding: 4px 10px;
+  font-size: 0.8rem;
+}
+
+/* ==========================================================================
+   10. BILL TABLE
+   ========================================================================== */
+
+.table-wrap {
+  position: relative; /* keeps the hidden "Actions" label inside the scroll box */
+  min-width: 0;
+  overflow-x: auto;
+}
+
+.bill-table {
+  width: 100%;
+  border-collapse: collapse; /* one line between cells, not two */
+}
+
+.bill-table th,
+.bill-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+
+.bill-table thead th {
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+/* Numbers line up when right-aligned and every digit has the same width */
+.bill-table .bill-number,
+.bill-table thead th:nth-child(n + 2):nth-child(-n + 4),
+#bill-total {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.bill-table tfoot th,
+.bill-table tfoot td {
+  border-bottom: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.bill-actions {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+/* ==========================================================================
+   11. PAST BILLS AND PRINTED RECEIPT
+   ========================================================================== */
+
+summary {
+  cursor: pointer;
+}
+
+.bill-lines {
+  margin: 8px 0 0;
+  padding-left: 20px;
+  font-size: 0.9rem;
+}
+
+/* The receipt exists in the page but is never shown on screen */
+.receipt {
+  display: none;
+}
+
+/* The shop name is a button so it can be clicked, but should look like a title */
+.logo-btn {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+
+.logo-btn:hover {
+  text-decoration: underline dotted;
+}
+
+/* With no page margin the browser has nowhere to print its own header and
+   footer (page title, address, date), so only the receipt appears. */
+@page {
+  margin: 0;
+}
+
+/* Rules in here apply only when the page is printed (or saved as PDF) */
+@media print {
+  /* Hide the whole app, show only the receipt */
+  .app {
+    display: none;
+  }
+
+  body {
+    background: #fff;
+    color: #000;
+  }
+
+  .receipt {
+    display: block;
+    width: 72mm; /* fits a common 80mm receipt roll; fine on A4 too */
+    margin: 0 auto;
+    padding: 8mm 0; /* replaces the page margin removed by @page above */
+    font-family: ui-monospace, Consolas, monospace;
+    font-size: 11pt;
+  }
+
+  .receipt h1,
+  .receipt p {
+    margin: 0 0 4px;
+    text-align: center;
+  }
+
+  .receipt table {
+    width: 100%;
+    margin: 10px 0;
+    border-collapse: collapse;
+  }
+
+  .receipt td {
+    padding: 2px 0;
+    vertical-align: top;
+  }
+
+  .receipt-amount {
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  .receipt-unit {
+    padding-left: 12px;
+    font-size: 9pt;
+  }
+
+  .receipt-total td {
+    padding-top: 6px;
+    border-top: 1px dashed #000;
+    font-weight: 700;
+  }
+}
