@@ -12,7 +12,7 @@ You need Python 3 (any recent version).
 python serve.py
 ```
 
-Then open <http://localhost:8765> in Chrome or Edge.
+Then open (https://xuzong08.github.io/qr-barcode-scanner/) in Chrome or Edge.
 
 Do not open `index.html` by double-clicking it. The app uses JavaScript
 modules and the camera, and browsers only allow both on `http://localhost` or
